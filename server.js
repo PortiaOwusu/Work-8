@@ -1,18 +1,29 @@
+require("dotenv").config();
 const express = require("express");
 
-require("./Config/dbConnect");
+// connecting to database
+require("./config/dbConnect");
 
-require("./router/authRouter");
-require("./router/userRouter");
+// consting routes
+const postRoutes = require("./routers/postRoutes");
+const authRoutes = require("./routers/authRoutes");
 
 const app = express();
 app.use(express.json());
 
-app.use("/auth", require("./routers/authRouter"));
-app.use("/user", require("./routers/userRouter"));
+// app.use("/auth", authRoutes);
+app.use("/posts", postRoutes);
 
+// catch all routes not on the server
 app.all("*", (req, res, next) => {
+  res
+    .status(404)
+    .json({ message: `Cannot find ${req.originalUrl} on the server` });
+});
+
+//
+app.use((error, req, res, next) => {
   res.status(error.status || 500).json({ message: error.message });
 });
 
-app.listen(4000, () => console.log("Server up avnd running"));
+module.exports = app.listen(4000, () => console.log("Server up and running"));
